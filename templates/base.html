@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>{% block title %}{% endblock %}</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <link rel="stylesheet" href="../static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../static/css/base.css">
+    <link rel="shortcut icon" href="../static/images/logo-only.png" type="image/x-icon">
+    <script src="../static/js/bootstrap.min.js"></script>
+    <script>const csrfToken = "{{ csrf_token }}";</script>
+</head>
+
+<body>
+    <header>
+        <div class="nav-wrapper">
+            <div class="logo-container">
+                <img class="logo" src="../static/images/logo.png" alt="Logo">
+            </div>
+            <nav>
+                <div class="nav-container">
+                    <ul class="nav-tabs">
+                        <li class="nav-tab"><a href="/">Add</a></li></a>
+                        <li class="nav-tab"><a href="/view">View</a></li></a>
+                        <li class="nav-tab"><a href="/edit">Edit</a></li></a>
+                    </ul>
+                </div>
+            </nav>
+        </div>
+    </header>
+    
+    <main>
+        <div class="container">
+            {% block body %} {% endblock %}
+        </div>
+    </main>
+
+    <footer>
+        <div class="container d-flex justify-content-center align-items-center ">
+            <p>For more details about OpenBSD PF Firewall, check <a href="https://www.openbsd.org/faq/pf/" target="_blank">Documentation!!</a></p>
+        </div>
+    </footer>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
