@@ -2,3 +2,4 @@ app/__pycache__
 app/migrations
 pffirewall/__pycache__
 db.sqlite3
+new.py

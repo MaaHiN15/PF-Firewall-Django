@@ -1,7 +1,5 @@
 from .models import Options, DomainBlock
-import psutil, re, subprocess, random
-
-
+import psutil, re, random, pydig
 
 class Utilities:
     def getInterfaces(self):
@@ -21,13 +19,9 @@ class Utilities:
             domain.save()
         return True
             
-
     def digHostname(self, name):
         try:
-            result = subprocess.run(["dig", "A", "+short", name], capture_output=True, text=True, check=True)
-            ips = result.stdout.splitlines()
-            valid_ips = [item for item in ips if self.validateIP(item)]
-            self.second_set.update(valid_ips)
+            self.second_set.update([item for item in pydig.query(name, 'A') if self.validateIP(item)])
             if self.first_set != self.second_set:
                 self.first_set = self.second_set.copy()
                 self.count = 0
@@ -35,6 +29,7 @@ class Utilities:
                 self.count += 1
         except Exception as e:
             return e
+        
     def validateIP(self, ip):
         pattern = r'^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.?\b){4}$'
         return re.match(pattern, ip) is not None
