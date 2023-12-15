@@ -36,6 +36,7 @@ class Filter(models.Model):
 
 class NatRules(models.Model):
     id = models.UUIDField(primary_key=True, unique=True, default=uuid4)
+    natChoose = models.CharField(max_length=10)
     position = models.IntegerField()
     interfaces = models.CharField(max_length=100)
     protocol = models.CharField(max_length=100)
@@ -44,7 +45,6 @@ class NatRules(models.Model):
     destAddress = models.CharField(max_length=1000)
     destPort = models.CharField(max_length=100)
     natIP = models.CharField(max_length=20, null=True)
-    log = models.CharField(max_length=10, null=True)
     class Meta:
         db_table = 'NatRules'
 

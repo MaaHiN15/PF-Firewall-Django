@@ -1,7 +1,10 @@
-from .models import Options, Domain, Filter, Table, Position
-import psutil, re, random, pydig, fileinput
+from .models import Options, Domain, Filter, Table, Position, NatRules
+import psutil, re, pydig, fileinput, os, shutil
+from pffirewall.settings import BASE_DIR
 
 def writeFile(position, line):
+    if not os.path.exists(BASE_DIR / 'pf.conf'):
+        shutil.copyfile(BASE_DIR / 'pf.conf.temp', BASE_DIR / 'pf.conf')
     with fileinput.FileInput('pf.conf', inplace=True) as file:
         for p, l in enumerate(file, start=1):
             if p == position:
@@ -22,22 +25,24 @@ class DomainDef:
             self.domainPosition = obj.domainPosition
         except Position.DoesNotExist:
             obj = Position.objects.create(id=1, tablePosition=10, filterRulePosition=200, domainPosition= 300, natRulePosition=450)
+            obj.save()
             self.domainPosition = obj.domainPosition
 
-    def domainLoop(self, names):
-        for name in names:
-            self.count = 0
-            self.first_set = set()
-            self.second_set = set()
-            for _ in range(200):
-                if self.count > 20:
-                    break
-                self.digHostname(name)
-            domain = Domain(position=random.randint(0, 1000), address=list(self.first_set), domainName=name)
-            domain.save()
-            writeFile(position=self.domainPosition, line=f'block out to {{ {",".join(list(self.first_set))} }}')
-            self.domainPosition += 1
-            Position.objects.filter(id=1).update(domainPosition=self.domainPosition)
+    def domainLoop(self, name):
+        if Domain.objects.filter(domainName=name).exists():
+            return False
+        self.count = 0
+        self.first_set = set()
+        self.second_set = set()
+        for _ in range(200):
+            if self.count > 20:
+                break
+            self.digHostname(name)
+        domain = Domain(position=self.domainPosition, address=list(self.first_set), domainName=name)
+        domain.save()
+        writeFile(position=self.domainPosition, line=f'block out to {{ {" ".join(list(self.first_set))} }}')
+        self.domainPosition += 1
+        Position.objects.filter(id=1).update(domainPosition=self.domainPosition)
         return True
             
     def digHostname(self, name):
@@ -104,6 +109,7 @@ class TableDef:
             self.lastPosition = obj.tablePosition
         except Position.DoesNotExist:
             obj = Position.objects.create(id=1, tablePosition=10, filterRulePosition=200, domainPosition= 300, natRulePosition=450)
+            obj.save()
             self.lastPosition = obj.tablePosition
     def tableCreation(self, data):
         if not Table.objects.filter(name=data['tabName']).exists() and not Table.objects.filter(iplist=data['tabIps']).exists():
@@ -123,6 +129,7 @@ class FilterRulesDef:
             self.filterRulePosition = obj.filterRulePosition
         except Position.DoesNotExist:
             obj = Position.objects.create(id=1, tablePosition=10, filterRulePosition=200, domainPosition= 300, natRulePosition=450)
+            obj.save()
             self.filterRulePosition = obj.filterRulePosition
     def filterRuleCreation(self, data):
         try:
@@ -159,44 +166,111 @@ class FilterRulesDef:
             self.rule += f' on {data["interface"]}'
 
         if not checkForAll(data['protocol']):
-            self.rule += f' proto {{ {",".join(map(str, data["protocol"]))} }}'
+            self.rule += f' proto {{ {" ".join(map(str, data["protocol"]))} }}'
 
         if not checkForAll(data['sourceAddress']) and checkForAll(data['sourcePort']):
             if data['type'] == 'table':
-                self.rule += f' from {{ {",".join(map(str, ["<{}>".format(_) for _ in data["sourceAddress"]]))} }}'
+                self.rule += f' from {{ {" ".join(map(str, ["<{}>".format(_) for _ in data["sourceAddress"]]))} }}'
             else:
-                self.rule += f' from {{ {",".join(map(str, data["sourceAddress"]))} }}'
+                self.rule += f' from {{ {" ".join(map(str, data["sourceAddress"]))} }}'
 
         if checkForAll(data['sourceAddress']) and not checkForAll(data['sourcePort']):
-            self.rule += f' from any port {{ {",".join(map(str, data["sourcePort"]))} }}'
+            self.rule += f' from any port {{ {" ".join(map(str, data["sourcePort"]))} }}'
 
         if not checkForAll(data['sourceAddress']) and not checkForAll(data['sourcePort']):
             if data['type'] == 'table':
-                self.rule += f' from {{ {",".join(map(str, ["<{}>".format(_) for _ in data["sourceAddress"]]))} }} port {{ {",".join(map(str, data["sourcePort"]))} }}'
+                self.rule += f' from {{ {" ".join(map(str, ["<{}>".format(_) for _ in data["sourceAddress"]]))} }} port {{ {" ".join(map(str, data["sourcePort"]))} }}'
             else:
-                self.rule += f' from {{ {",".join(map(str, data["sourceAddress"]))} }} port {{ {",".join(map(str, data["sourcePort"]))} }}'
+                self.rule += f' from {{ {" ".join(map(str, data["sourceAddress"]))} }} port {{ {" ".join(map(str, data["sourcePort"]))} }}'
 
 
         if not checkForAll(data['destAddress']) and checkForAll(data['destPort']):
             if data['type'] == 'table':
-                self.rule += f' to {{ {",".join(map(str, ["<{}>".format(_) for _ in data["destAddress"]]))} }}'
+                self.rule += f' to {{ {" ".join(map(str, ["<{}>".format(_) for _ in data["destAddress"]]))} }}'
             else:
-                self.rule += f' to {{ {",".join(map(str, data["destAddress"]))} }}'
+                self.rule += f' to {{ {" ".join(map(str, data["destAddress"]))} }}'
 
 
         if checkForAll(data['destAddress']) and not checkForAll(data['destPort']):
-            self.rule += f' to any port {{ {",".join(map(str, data["destPort"]))} }}'
+            self.rule += f' to any port {{ {" ".join(map(str, data["destPort"]))} }}'
 
         if not checkForAll(data['destAddress']) and not checkForAll(data['destPort']):
             if data['type'] == 'table':
-                self.rule += f' to {{ {",".join(map(str, ["<{}>".format(_) for _ in data["destAddress"]]))} }} port {{ {",".join(map(str, data["destPort"]))} }}'
+                self.rule += f' to {{ {" ".join(map(str, ["<{}>".format(_) for _ in data["destAddress"]]))} }} port {{ {" ".join(map(str, data["destPort"]))} }}'
             else:
-                self.rule += f' to {{ {",".join(map(str, data["destAddress"]))} }} port {{ {",".join(map(str, data["destPort"]))} }}'
+                self.rule += f' to {{ {" ".join(map(str, data["destAddress"]))} }} port {{ {" ".join(map(str, data["destPort"]))} }}'
 
         if not any(_ in self.rule for _ in ['from', 'to']):
             self.rule += ' all'
-        print(self.rule)
         return self.rule
 
 
-        
+class NatDef:
+    def __init__(self) -> None:
+        try:
+            obj = Position.objects.get(id=1)
+            self.natRulePosition = obj.natRulePosition
+        except Position.DoesNotExist:
+            obj = Position.objects.create(id=1, tablePosition=10, filterRulePosition=200, domainPosition= 300, natRulePosition=450)
+            obj.save()
+            self.natRulePosition = obj.natRulePosition
+    def natRuleFunc(self, data):
+            print(data)
+            natRules = NatRules(
+                natChoose = data['natChoose'],
+                position=self.natRulePosition, 
+                interfaces = data['interface'],
+                protocol = data['protocol'],
+                sourceAddress = data['sourceAddress'],
+                sourcePort = data['sourcePort'],
+                destAddress = data['destAddress'],
+                destPort = data['destPort'],
+                natIP = data['natIP']
+            )
+            natRules.save()
+            writeFile(position=self.natRulePosition, line=self.makeNatRule(data))
+            self.natRulePosition += 1
+            Position.objects.filter(id=1).update(natRulePosition=self.natRulePosition)
+            return True
+
+    def makeNatRule(self, data):
+        def checkForAll(item):
+            return any(_ == 'all' for _ in item)
+        if data['natChoose'] == 'nat':
+            self.rule = 'nat'
+        elif data['natChoose'] == 'binat':
+            self.rule = 'binat'
+
+        if not data['interface'] == 'all':
+            self.rule += f' on {data["interface"]}'
+
+        if not checkForAll(data['protocol']):
+            self.rule += f' proto {{ {" ".join(map(str, data["protocol"]))} }}'
+
+        if not checkForAll(data['sourceAddress']) and checkForAll(data['sourcePort']):
+            self.rule += f' from {{ {" ".join(map(str, data["sourceAddress"]))} }}'
+
+        if checkForAll(data['sourceAddress']) and not checkForAll(data['sourcePort']):
+            self.rule += f' from any port {{ {" ".join(map(str, data["sourcePort"]))} }}'
+
+        if not checkForAll(data['sourceAddress']) and not checkForAll(data['sourcePort']):
+            self.rule += f' from {{ {" ".join(map(str, data["sourceAddress"]))} }} port {{ {" ".join(map(str, data["sourcePort"]))} }}'
+
+        if 'from' not in self.rule:
+            self.rule += ' from any'
+
+        if not checkForAll(data['destAddress']) and checkForAll(data['destPort']):
+            self.rule += f' to {{ {" ".join(map(str, data["destAddress"]))} }}'
+
+        if checkForAll(data['destAddress']) and not checkForAll(data['destPort']):
+            self.rule += f' to any port {{ {" ".join(map(str, data["destPort"]))} }}'
+
+        if not checkForAll(data['destAddress']) and not checkForAll(data['destPort']):
+            self.rule += f' to {{ {" ".join(map(str, data["destAddress"]))} }} port {{ {" ".join(map(str, data["destPort"]))} }}'
+
+        if 'to' not in self.rule:
+            self.rule += '  to any'
+
+        self.rule += f' -> {data["natIP"]}'
+        print(self.rule)
+        return self.rule

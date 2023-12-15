@@ -104,7 +104,7 @@ function tab_form(e) {
         "tabName": elem.get('tab-name'),
         "tabIps": ips
     };
-    
+
     confirm_text.innerHTML = `<table class="table table-hover">
     <tbody>
         <tr><td scope="row">Table Name</th><td>${data.tabName}</td></tr>
@@ -278,14 +278,13 @@ function nat_form(e) {
 
     let data = {
         "natChoose": elem.get('natChoose'),
-        "interfaces": multiselect(e.target.elements['interface']),
+        "interface": elem.get('interface'),
         "protocol": multiselect(e.target.elements['protocol']),
         "sourceAddress": sourceAddress,
         "sourcePort": sourcePort,
         "destAddress": destAddress,
         "destPort": destPort,
-        "natIP": elem.get('natIP'),
-        "logCheck": elem.get('logCheck')
+        "natIP": elem.get('natIP')
     };
 
     confirm_text.innerHTML = `<table class="table table-hover">
@@ -298,7 +297,6 @@ function nat_form(e) {
         <tr><td scope="row">Destination Address</td><td>${data.destAddress}</td></tr>
         <tr><td scope="row">Destination Port</td><td>${data.destPort}</td></tr>
         <tr><td scope="row">NAT IP</td><td>${data.natIP}</td></tr>
-        <tr><td scope="row">Log</td><td>${data.logCheck}</td></tr>
     </tbody>
     </table>
     `
@@ -312,22 +310,17 @@ function nat_form(e) {
 function domain_form(e){
     e.preventDefault();
     const elem = new FormData(e.target);
-    let domainList = elem.get('domain-list').split('\n');
-    if (domainList.some(i => !validateDomain(i))) {
+    let domainName = elem.get('domain-name');
+    if (!validateDomain(domainName)){
         alert_text.innerHTML = "<p><strong class='text-danger' id='alert-text'>Enter valid Domain name!!! </strong></p>";
         alertModel.show();
         return;
     }
-    let data = {'names' : domainList}
-    let listData = '';
-    domainList.forEach(item => {
-        listData += `<li class="list-group-item">${item}</li>`
-    });
-    confirm_text.innerHTML = `<ul class="list-group list-group-flush">${listData}</ul>`
+    confirm_text.innerHTML = `<ul class="list-group list-group-flush"><li class="list-group-item">${domainName}</li></ul>`
     confirmModel.show();
     document.getElementById('confirmButton').addEventListener('click', async function () {
         confirmModel.hide();
-        await fetchReq('/api/domain', data);
+        await fetchReq('/api/domain', {'name' : domainName});
     }, { once: true });    
     e.target.reset();
 }

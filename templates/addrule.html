@@ -471,15 +471,12 @@
 							<div class="col">
 								<label class="col-sm-4 col-form-label text-primary">Interface</label>
 								<div class="col-sm-8">
-									<select class="form-select" name="interface" multiple
-										aria-label="multiple select example">
-										<option value="all" selected>All</option>
+									<select class="form-select" name="interface">
 										{% for item in interfaces %}
 										<option value="{{ item }}">{{ item }}</option>
 										{% endfor %}
-
 									</select>
-									<p><small>*This is multi-select option, ctrl+click each item to select.</small>
+									<p><small>*Select an interface.</small>
 									</p>
 								</div>
 							</div>
@@ -547,14 +544,6 @@
 							<div class="col-md-2">
 							</div>
 						</div>
-						<div class="col-12 m-3">
-							<div class="form-check">
-								<input class="form-check-input" name="logCheck" type="checkbox" id="gridCheck">
-								<label class="form-check-label" for="gridCheck">
-									Log
-								</label>
-							</div>
-						</div>
 						<button type="submit" class="btn btn-success ">Submit</button>
 					</form>
 				</div>
@@ -566,19 +555,18 @@
 			<h2 class="accordion-header" id="flush-headingEight">
 				<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
 					data-bs-target="#flush-collapseEight" aria-expanded="false" aria-controls="flush-collapseEight">
-					<strong>Block Domains</strong>
+					<strong>Block Domain</strong>
 				</button>
 			</h2>
 			<div id="flush-collapseEight" class="accordion-collapse collapse" aria-labelledby="flush-headingEight"
 				data-bs-parent="#accordionFlushExample">
 				<div class="accordion-body">
 					<form id="domain-form">
-						<div class="form-floating">
-							<textarea class="form-control" name="domain-list" placeholder="Leave a comment here" id="floatingTextarea2" style="height: 100px" required></textarea>
-							<label for="floatingTextarea2">Domain names</label>
-						  </div>
-						<p><small>*If more then one domain means enter names on each new line. Try without http/https and slashes.</small><br>
-						<button type="submit" class="btn btn-success mt-3">Submit</button>
+						<div class="input-group mb-3">
+							<span class="input-group-text">Domain Name</span>
+							<input type="text" name="domain-name" class="form-control" aria-label="domain name">
+						</div>	
+						<button type="submit" class="btn btn-success mt-1">Submit</button>					
 					</form>
 				</div>
 			</div>

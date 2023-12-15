@@ -1,8 +1,8 @@
 from django.shortcuts import render
 from django.http import JsonResponse
-import json, random
-from .models import Options, Table,  NatRules
-from .utilities import OptionsDef, DomainDef, TableDef, FilterRulesDef, getInterfaces
+import json
+from .models import Options, Table
+from .utilities import OptionsDef, DomainDef, TableDef, FilterRulesDef, getInterfaces, NatDef
 
 def index(req):
     return render(req, 'addrule.html', {
@@ -33,27 +33,18 @@ def table(req):
 def filter(req):
     if req.method == 'POST':
         try:
-            FilterRulesDef().filterRuleCreation(json.loads(req.body.decode("utf-8")))
-            return JsonResponse({'status': 200, 'text' : 'Rules using Table added successfully!!!'})
+            if FilterRulesDef().filterRuleCreation(json.loads(req.body.decode("utf-8"))):
+                return JsonResponse({'status': 200, 'text' : 'Rules using Table added successfully!!!'})
+            return JsonResponse({'status': 300, 'text' : 'Duplicate Rule...Check it!!!'})
         except Exception as e:
             return JsonResponse({'status' : 400, 'text' : e})
     
 def nat(req):
     if req.method == 'POST':
         try:
-            data = json.loads(req.body.decode("utf-8"))
-            natRules = NatRules(
-                position=random.randint(0,1000), 
-                interfaces = data['interfaces'],
-                protocol = data['protocol'],
-                sourceAddress = data['sourceAddress'],
-                sourcePort = data['sourcePort'],
-                destAddress = data['destAddress'],
-                destPort = data['destPort'],
-                natIP = data['natIP'],
-                log = data['logCheck'])
-            natRules.save()
-            return JsonResponse({'status': 200, 'text' : 'NAT/BINAT Rules added Successfully!!!'})
+            if NatDef().natRuleFunc(json.loads(req.body.decode("utf-8"))):
+                return JsonResponse({'status': 200, 'text' : 'NAT/BINAT Rules added Successfully!!!'})
+            return JsonResponse({'status': 300, 'text' : 'Duplicate NAT/BINAT Rules!!!'})
         except Exception as e:
             return JsonResponse({'status' : 400, 'text' : e})
 
@@ -61,7 +52,8 @@ def domainBlock(req):
     if req.method == 'POST':
         try:
             data = json.loads(req.body.decode('utf-8'))
-            DomainDef().domainLoop(data['names'])
-            return JsonResponse({'status':200, 'text': 'Domain Block Added successfully!!!'})
+            if DomainDef().domainLoop(data['name']):
+                return JsonResponse({'status':200, 'text': 'Domain Block Added successfully!!!'})
+            return JsonResponse({'status':300, 'text': 'Duplicate Domain Block..!!!'})
         except Exception as e:
             return JsonResponse({'status':400, 'text' : e})
