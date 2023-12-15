@@ -2,19 +2,21 @@ const alert_text = document.getElementById('alert-text');
 const confirm_text = document.getElementById('confirm-text');
 const successToastText = document.getElementById('succuessToastText');
 const unsuccessToastText = document.getElementById('unsuccuessToastText');
+const warningToastText = document.getElementById('warningToastText');
 const alertModel = new bootstrap.Modal(document.getElementById('alertModel'));
 const confirmModel = new bootstrap.Modal(document.getElementById('confirmModel'));
 const successToast = new bootstrap.Toast(document.getElementById('successToast'));
 const unsuccessToast = new bootstrap.Toast(document.getElementById('unsuccessToast'));
+const warningToast = new bootstrap.Toast(document.getElementById('warningToast'))
 
 
 function validateCidrIp(CidrIp) {
-    const cidrIpRegex = /^((((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\/([1-9]|[1-2][0-9]|3[0-2])))$|^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)|any)$/;
+    const cidrIpRegex = /^((((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\/([1-9]|[1-2][0-9]|3[0-2])))$|^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)|all)$/;
     return cidrIpRegex.test(CidrIp) ? true : false;
 };
 
 function validatePort(port) {
-    const portRegex = /^((0|6553[0-5]|655[0-2][0-9]|65[0-4][0-9]{2}|6[0-4][0-9]{3}|[1-5][0-9]{4}|[1-9][0-9]{0,3})|any)$/;
+    const portRegex = /^((0|6553[0-5]|655[0-2][0-9]|65[0-4][0-9]{2}|6[0-4][0-9]{3}|[1-5][0-9]{4}|[1-9][0-9]{0,3})|all)$/;
     return portRegex.test(port) ? true : false;
 }
 
@@ -47,12 +49,14 @@ async function fetchReq(url, data) {
         .then(data => {
             confirmModel.hide();
             if (data['status'] == 200) {
-                successToastText.innerHTML = `<div class="toast-body" id="succuessToastText">${data['text']}</div>`
+                successToastText.innerHTML = data['text']
                 successToast.show();
-            }
-            else {
+            } else if (data['status']==300){
+                warningToast.show();
+                warningToastText.innerHTML = data['text']
+            } else {
                 unsuccessToast.show();
-                unsuccessToastText.innerHTML = `<div class="toast-body" id="succuessToastText">${data['text']}</div>`
+                unsuccessToastText.innerHTML = data['text']
             }
         })
 }
@@ -67,8 +71,7 @@ function base_section_form(e) {
         "OptimLevel": elem.get('set-optim'),
         "rulesetOptim": elem.get('rule-set-optim'),
         "statePolicy": elem.get('state-pol'),
-        "timeoutInterval": elem.get('timeout-interval'),
-        "skipinterfaces": multiselect(e.target.elements['skip-if'])
+        "timeoutInterval": elem.get('timeout-interval')
     }
 
     confirm_text.innerHTML = `<table class="table table-hover">
@@ -79,7 +82,6 @@ function base_section_form(e) {
         <tr><td scope="row">Rule set Optimization level</td><td>${data.rulesetOptim}</td></tr>
         <tr><td scope="row">State Policy</td><td>${data.statePolicy}</td></tr>
         <tr><td scope="row">Timeout Interval</td><td>${data.timeoutInterval}</td></tr>
-        <tr><td scope="row">Skip Interfaces</td><td>${data.skipinterfaces}</td></tr>
     </tbody>
     </table>
     `
@@ -102,7 +104,7 @@ function tab_form(e) {
         "tabName": elem.get('tab-name'),
         "tabIps": ips
     };
-
+    
     confirm_text.innerHTML = `<table class="table table-hover">
     <tbody>
         <tr><td scope="row">Table Name</th><td>${data.tabName}</td></tr>
@@ -114,7 +116,6 @@ function tab_form(e) {
     document.getElementById('confirmButton').addEventListener('click', async function () {
         await fetchReq('/api/table', data);
     }, { once: true });
-    e.target.reset();
 };
 
 function filter_tab_form(e) {
@@ -137,29 +138,26 @@ function filter_tab_form(e) {
     let data = {
         "action": elem.get('action'),
         "direction": elem.get('direction'),
-        "interfaces": multiselect(e.target.elements['interface']),
+        "interface": elem.get('interface'),
         "protocol": multiselect(e.target.elements['protocol']),
         "sourceAddress": multiselect(e.target.elements['sourceAddress']),
         "sourcePort": sourcePort,
         "destAddress": multiselect(e.target.elements['destAddress']),
         "destPort": destPort,
-        "tcpFlags": multiselect(e.target.elements['tcpFlags']),
-        "state": elem.get('state'),
         "force": elem.get('forceCheck'),
-        "log": elem.get('logCheck')
+        "log": elem.get('logCheck'),
+        "type" : 'table'
     }
     confirm_text.innerHTML = `<table class="table table-hover">
     <tbody>
         <tr><td scope="row">Action</th><td>${data.action}</td></tr>
         <tr><td scope="row">Direction</td><td>${data.direction}</td></tr>
-        <tr><td scope="row">Interfaces</td><td>${data.interfaces}</td></tr>
+        <tr><td scope="row">Interfaces</td><td>${data.interface}</td></tr>
         <tr><td scope="row">Protocol</td><td>${data.protocol}</td></tr>
         <tr><td scope="row">Source Address</td><td>${data.sourceAddress}</td></tr>
         <tr><td scope="row">Source Port</td><td>${data.sourcePort}</td></tr>
         <tr><td scope="row">Destination Address</td><td>${data.destAddress}</td></tr>
         <tr><td scope="row">Destination Port</td><td>${data.destPort}</td></tr>
-        <tr><td scope="row">TCP Flags</td><td>${data.tcpFlags}</td></tr>
-        <tr><td scope="row">State</td><td>${data.state}</td></tr>
         <tr><td scope="row">Force</td><td>${data.force}</td></tr>
         <tr><td scope="row">Log</td><td>${data.log}</td></tr>
     </tbody>
@@ -167,7 +165,7 @@ function filter_tab_form(e) {
     `
     confirmModel.show();
     document.getElementById('confirmButton').addEventListener('click', async function () {
-        await fetchReq('/api/rule/table', data);
+        await fetchReq('/api/filter', data);
     }, { once: true });
     e.target.reset();
 }
@@ -207,30 +205,27 @@ function filter_man_form(e) {
     let data = {
         "action": elem.get('action'),
         "direction": elem.get('direction'),
-        "interfaces": multiselect(e.target.elements['interface']),
+        "interface": elem.get('interface'),
         "protocol": multiselect(e.target.elements['protocol']),
         "sourceAddress": sourceAddress,
         "sourcePort": sourcePort,
         "destAddress": destAddress,
         "destPort": destPort,
-        "tcpFlags": multiselect(e.target.elements['tcpFlags']),
-        "state": elem.get('state'),
         "force": elem.get('forceCheck'),
-        "log": elem.get('logCheck')
+        "log": elem.get('logCheck'),
+        "type" : 'manual'
     };
 
     confirm_text.innerHTML = `<table class="table table-hover">
     <tbody>
         <tr><td scope="row">Action</th><td>${data.action}</td></tr>
         <tr><td scope="row">Direction</td><td>${data.direction}</td></tr>
-        <tr><td scope="row">Interfaces</td><td>${data.interfaces}</td></tr>
+        <tr><td scope="row">Interfaces</td><td>${data.interface}</td></tr>
         <tr><td scope="row">Protocol</td><td>${data.protocol}</td></tr>
         <tr><td scope="row">Source Address</td><td>${data.sourceAddress}</td></tr>
         <tr><td scope="row">Source Port</td><td>${data.sourcePort}</td></tr>
         <tr><td scope="row">Destination Address</td><td>${data.destAddress}</td></tr>
         <tr><td scope="row">Destination Port</td><td>${data.destPort}</td></tr>
-        <tr><td scope="row">TCP Flags</td><td>${data.tcpFlags}</td></tr>
-        <tr><td scope="row">State</td><td>${data.state}</td></tr>
         <tr><td scope="row">Force</td><td>${data.force}</td></tr>
         <tr><td scope="row">Log</td><td>${data.log}</td></tr>
     </tbody>
@@ -238,7 +233,7 @@ function filter_man_form(e) {
     `
     confirmModel.show();
     document.getElementById('confirmButton').addEventListener('click', async function () {
-        await fetchReq('/api/rule/manual', data);
+        await fetchReq('/api/filter', data);
     }, { once: true });
     e.target.reset();
 }

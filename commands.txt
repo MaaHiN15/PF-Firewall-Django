@@ -115,3 +115,4 @@ NAT (Network Address Translation)
 
 
 demo-knr-s3-bucket-2021.s3.us-west-1.amazonaws.com
+

@@ -3,3 +3,6 @@ app/migrations
 pffirewall/__pycache__
 db.sqlite3
 new.py
+demo.txt
+.DS_Store
+static/.DS_Store

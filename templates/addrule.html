@@ -6,7 +6,6 @@
 <div class="container my-5 h-100">
 
 	<div class="accordion accordion-flush" id="accordionFlushExample">
-
 		<!-- Basic Options -->
 		<div class="accordion-item">
 			<h2 class="accordion-header" id="flush-headingSix">
@@ -89,19 +88,6 @@
 									<input type="number" class="form-control" value="10" name="timeout-interval">
 									<span class="input-group-text">Seconds</span>
 								</div>
-							</div>
-						</div>
-						<div class="col-sm-6">
-							<label class="col-sm-4 col-form-label text-primary">Skip Interface</label>
-							<div class="col-sm-8">
-								<select class="form-select" multiple aria-label="multiple select example"
-									name="skip-if">
-									{% for item in interfaces %}
-									<option value="{{ item }}">{{ item }}</option>
-									{% endfor %}
-								</select>
-								<p><small>*This is multi-select option, ctrl+click each item to select.</small>
-								</p>
 							</div>
 						</div>
 						<button type="submit" class="btn btn-success ">Submit</button>
@@ -200,14 +186,13 @@
 							<div class="col">
 								<label class="col-sm-4 col-form-label text-primary">Interface</label>
 								<div class="col-sm-8">
-									<select class="form-select" name="interface" multiple
-										aria-label="multiple select example">
+									<select class="form-select" name="interface">
 										<option value="all" selected>All</option>
 										{% for item in interfaces %}
 										<option value="{{ item }}">{{ item }}</option>
 										{% endfor %}
 									</select>
-									<p><small>*This is multi-select option, ctrl+click each item to select.</small>
+									<p><small>*Select an interface.</small>
 									</p>
 								</div>
 							</div>
@@ -217,9 +202,10 @@
 									<select class="form-select" name="protocol" multiple
 										aria-label="multiple select example">
 										<option value="all" selected>All</option>
-										<option value="2">TCP</option>
-										<option value="3">UDP</option>
-										<option value="4">ICMP</option>
+										<option value="tcp">TCP</option>
+										<option value="udp">UDP</option>
+										<option value="icmp">ICMP</option>
+										<option value="icmp6">ICMP</option>
 									</select>
 									<p><small>*This is multi-select option, ctrl+click each item to select.</small>
 									</p>
@@ -249,7 +235,7 @@
 									Ports</label>
 								<div class="col-sm-8">
 									<textarea class="form-control" name="sourcePort" name="" id=""
-										rows="3">any</textarea>
+										rows="3">all</textarea>
 									<p><small>*Enter port at each line.</small></p>
 								</div>
 							</div>
@@ -276,35 +262,8 @@
 								<label class="col-sm-4 col-form-label text-primary">Destination
 									Ports</label>
 								<div class="col-sm-8">
-									<textarea class="form-control" name="destPort" id="" rows="3">any</textarea>
+									<textarea class="form-control" name="destPort" id="" rows="3">all</textarea>
 									<p><small>*Enter port at each line.</small></p>
-								</div>
-							</div>
-						</div>
-
-						<div class="row">
-							<div class="col">
-								<label class="col-sm-4 col-form-label text-primary">TCP
-									Flags</label>
-								<div class="col-sm-8">
-									<select class="form-select" name="tcpFlags" multiple
-										aria-label="multiple select example">
-										<option value="1">SY</option>
-										<option value="2">NF</option>
-										<option value="3">KY</option>
-									</select>
-									<p><small>*This is multi-select option, ctrl+click each item to select.</small>
-									</p>
-								</div>
-							</div>
-							<div class="col">
-								<label class="col-sm-4 col-form-label text-primary">State</label>
-								<div class="col-sm-8">
-									<select class="form-select" name="state">
-										<option value="1" selected>Keep State</option>
-										<option value="2">No State</option>
-										<option value="3">Partial State</option>
-									</select>
 								</div>
 							</div>
 						</div>
@@ -391,14 +350,13 @@
 							<div class="col">
 								<label class="col-sm-4 col-form-label text-primary">Interface</label>
 								<div class="col-sm-8">
-									<select class="form-select" name="interface" multiple
-										aria-label="multiple select example">
+									<select class="form-select" name="interface">
 										<option value="all" selected>All</option>
 										{% for item in interfaces %}
 										<option value="{{ item }}">{{ item }}</option>
 										{% endfor %}
 									</select>
-									<p><small>*This is multi-select option, ctrl+click each item to select.</small>
+									<p><small>*Select an interface.</small>
 									</p>
 								</div>
 							</div>
@@ -423,7 +381,7 @@
 								<label class="col-sm-4 col-form-label text-primary">Source IP
 									Addresses</label>
 								<div class="col-sm-8">
-									<textarea class="form-control" name="sourceAddress" rows="3">any</textarea>
+									<textarea class="form-control" name="sourceAddress" rows="3">all</textarea>
 									<p><small>*Enter IP at each line.</small></p>
 								</div>
 							</div>
@@ -431,7 +389,7 @@
 								<label class="col-sm-4 col-form-label text-primary">Source
 									Ports</label>
 								<div class="col-sm-8">
-									<textarea class="form-control" name="sourcePort" id="" rows="3">any</textarea>
+									<textarea class="form-control" name="sourcePort" id="" rows="3">all</textarea>
 									<p><small>*Enter port at each line.</small></p>
 								</div>
 							</div>
@@ -442,7 +400,7 @@
 								<label class="col-sm-4 col-form-label text-primary">Destination IP
 									Addresses</label>
 								<div class="col-sm-8">
-									<textarea class="form-control" name="destAddress" id="" rows="3">any</textarea>
+									<textarea class="form-control" name="destAddress" id="" rows="3">all</textarea>
 									<p><small>*Enter IP at each line.</small></p>
 								</div>
 							</div>
@@ -450,36 +408,8 @@
 								<label class="col-sm-4 col-form-label text-primary">Destination
 									Ports</label>
 								<div class="col-sm-8">
-									<textarea class="form-control" name="destPort" id="" rows="3">any</textarea>
+									<textarea class="form-control" name="destPort" id="" rows="3">all</textarea>
 									<p><small>*Enter port at each line.</small></p>
-								</div>
-							</div>
-						</div>
-						<div class="row">
-							<div class="col">
-								<label class="col-sm-4 col-form-label text-primary">TCP
-									Flags</label>
-								<div class="col-sm-8">
-									<select class="form-select" name="tcpFlags" multiple
-										aria-label="multiple select example">
-										<option value="1">SY</option>
-										<option value="2">NF</option>
-										<option value="3">KY</option>
-									</select>
-									<p><small>*This is multi-select option, ctrl+click each item to select.</small>
-									</p>
-								</div>
-							</div>
-							<div class="col">
-								<label class="col-sm-4 col-form-label text-primary">State</label>
-								<div class="col-sm-8">
-									<select class="form-select" name="state">
-										<option value="1" selected>Keep State</option>
-										<option value="2">No State</option>
-										<option value="3">Partial State</option>
-									</select>
-									<p><small>*This is multi-select option, ctrl+click each item to select.</small>
-									</p>
 								</div>
 							</div>
 						</div>
@@ -574,7 +504,7 @@
 								<label class="col-sm-4 col-form-label text-primary">Source IP
 									Addresses</label>
 								<div class="col-sm-8">
-									<textarea class="form-control" name="sourceAddress" id="" rows="3">any</textarea>
+									<textarea class="form-control" name="sourceAddress" id="" rows="3">all</textarea>
 									<p><small>*Enter IP at each line.</small></p>
 								</div>
 							</div>
@@ -582,7 +512,7 @@
 								<label class="col-sm-4 col-form-label text-primary">Source
 									Ports</label>
 								<div class="col-sm-8">
-									<textarea class="form-control" name="sourcePort" id="" rows="3">any</textarea>
+									<textarea class="form-control" name="sourcePort" id="" rows="3">all</textarea>
 									<p><small>*Enter port at each line.</small></p>
 								</div>
 							</div>
@@ -593,7 +523,7 @@
 								<label class="col-sm-4 col-form-label text-primary">Destination IP
 									Addresses</label>
 								<div class="col-sm-8">
-									<textarea class="form-control" name="destAddress" id="" rows="3">any</textarea>
+									<textarea class="form-control" name="destAddress" id="" rows="3">all</textarea>
 									<p><small>*Enter IP at each line.</small></p>
 								</div>
 							</div>
@@ -601,7 +531,7 @@
 								<label class="col-sm-4 col-form-label text-primary">Destination
 									Ports</label>
 								<div class="col-sm-8">
-									<textarea class="form-control" name="destPort" id="" rows="3">any</textarea>
+									<textarea class="form-control" name="destPort" id="" rows="3">all</textarea>
 									<p><small>*Enter port at each line.</small></p>
 								</div>
 							</div>
@@ -722,7 +652,7 @@
 			<small>A second ago</small>
 			<button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
 		</div>
-		<div class="toast-body" id="succuessToastText"></div>
+		<div class="toast-body"><p id="succuessToastText"></p></div>
 	</div>
 </div>
 
@@ -734,7 +664,19 @@
 			<small>A second ago</small>
 			<button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
 		</div>
-		<div class="toast-body" id="succuessToastText"></div>
+		<div class="toast-body"><p id="unsuccessToastText"></p></div>
+	</div>
+</div>
+
+<!-- Warning Toast -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+	<div id="warningToast" class="toast text-bg-warning " role="alert" aria-live="assertive" aria-atomic="true">
+		<div class="toast-header">
+			<strong class="me-auto">PF Firewall</strong>
+			<small>A second ago</small>
+			<button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+		</div>
+		<div class="toast-body" ><p id="warningToastText"></p></div>
 	</div>
 </div>
 
