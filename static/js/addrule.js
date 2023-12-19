@@ -25,7 +25,7 @@ function validateIP(ip) {
     return ipRegex.test(ip) ? true : false;
 }
 
-function validateDomain(domain){
+function validateDomain(domain) {
     const domainRegex = /^(?!:\/\/)([a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/;
     return domainRegex.test(domain) ? true : false;
 }
@@ -51,7 +51,7 @@ async function fetchReq(url, data) {
             if (data['status'] == 200) {
                 successToastText.innerHTML = data['text']
                 successToast.show();
-            } else if (data['status']==300){
+            } else if (data['status'] == 300) {
                 warningToast.show();
                 warningToastText.innerHTML = data['text']
             } else {
@@ -67,7 +67,6 @@ function base_section_form(e) {
     const elem = new FormData(e.target);
     let data = {
         "blockPolicy": elem.get('set-blo-pol'),
-        "debugLevel": elem.get('set-deb-lev'),
         "OptimLevel": elem.get('set-optim'),
         "rulesetOptim": elem.get('rule-set-optim'),
         "statePolicy": elem.get('state-pol'),
@@ -77,7 +76,6 @@ function base_section_form(e) {
     confirm_text.innerHTML = `<table class="table table-hover">
     <tbody>
         <tr><td scope="row">Block Policy</th><td>${data.blockPolicy}</td></tr>
-        <tr><td scope="row">Debug Level</td><td>${data.debugLevel}</td></tr>
         <tr><td scope="row">Optimization Level</td><td>${data.OptimLevel}</td></tr>
         <tr><td scope="row">Rule set Optimization level</td><td>${data.rulesetOptim}</td></tr>
         <tr><td scope="row">State Policy</td><td>${data.statePolicy}</td></tr>
@@ -134,6 +132,15 @@ function filter_tab_form(e) {
         alertModel.show();
         return;
     };
+    position = elem.get('filterRulePosition');
+    if (position.length != 0) {
+        if (Number(position) <= 199 || Number(position) >= 298) {
+            alert_text.innerHTML = "<p><strong class='text-danger' id='alert-text'>Enter valid Position Number!!</strong></p>";
+            alertModel.show();
+            return;
+        }
+    }
+
 
     let data = {
         "action": elem.get('action'),
@@ -146,8 +153,10 @@ function filter_tab_form(e) {
         "destPort": destPort,
         "force": elem.get('forceCheck'),
         "log": elem.get('logCheck'),
-        "type" : 'table'
+        "type": 'table',
+        "position": position
     }
+
     confirm_text.innerHTML = `<table class="table table-hover">
     <tbody>
         <tr><td scope="row">Action</th><td>${data.action}</td></tr>
@@ -160,6 +169,7 @@ function filter_tab_form(e) {
         <tr><td scope="row">Destination Port</td><td>${data.destPort}</td></tr>
         <tr><td scope="row">Force</td><td>${data.force}</td></tr>
         <tr><td scope="row">Log</td><td>${data.log}</td></tr>
+        <tr><td scope="row">Position</td><td>${data.position}</td></tr>
     </tbody>
     </table>
     `
@@ -201,6 +211,14 @@ function filter_man_form(e) {
         alertModel.show();
         return;
     };
+    position = elem.get('filterRulePosition');
+    if (position.length != 0) {
+        if (Number(position) <= 199 || Number(position) >= 298) {
+            alert_text.innerHTML = "<p><strong class='text-danger' id='alert-text'>Enter valid Position Number!!</strong></p>";
+            alertModel.show();
+            return;
+        }
+    }
 
     let data = {
         "action": elem.get('action'),
@@ -213,14 +231,15 @@ function filter_man_form(e) {
         "destPort": destPort,
         "force": elem.get('forceCheck'),
         "log": elem.get('logCheck'),
-        "type" : 'manual'
+        "type": 'manual',
+        "position": position
     };
 
     confirm_text.innerHTML = `<table class="table table-hover">
     <tbody>
         <tr><td scope="row">Action</th><td>${data.action}</td></tr>
         <tr><td scope="row">Direction</td><td>${data.direction}</td></tr>
-        <tr><td scope="row">Interfaces</td><td>${data.interface}</td></tr>
+        <tr><td scope="row">Interface</td><td>${data.interface}</td></tr>
         <tr><td scope="row">Protocol</td><td>${data.protocol}</td></tr>
         <tr><td scope="row">Source Address</td><td>${data.sourceAddress}</td></tr>
         <tr><td scope="row">Source Port</td><td>${data.sourcePort}</td></tr>
@@ -228,6 +247,7 @@ function filter_man_form(e) {
         <tr><td scope="row">Destination Port</td><td>${data.destPort}</td></tr>
         <tr><td scope="row">Force</td><td>${data.force}</td></tr>
         <tr><td scope="row">Log</td><td>${data.log}</td></tr>
+        <tr><td scope="row">Position</td><td>${data.position}</td></tr>
     </tbody>
     </table>
     `
@@ -290,7 +310,7 @@ function nat_form(e) {
     confirm_text.innerHTML = `<table class="table table-hover">
     <tbody>
         <tr><td scope="row">Nat or Binat</td><td>${data.natChoose}</td></tr>
-        <tr><td scope="row">Interfaces</td><td>${data.interfaces}</td></tr>
+        <tr><td scope="row">Interface</td><td>${data.interface}</td></tr>
         <tr><td scope="row">Protocol</td><td>${data.protocol}</td></tr>
         <tr><td scope="row">Source Address</td><td>${data.sourceAddress}</td></tr>
         <tr><td scope="row">Source Port</td><td>${data.sourcePort}</td></tr>
@@ -307,11 +327,11 @@ function nat_form(e) {
     e.target.reset();
 };
 
-function domain_form(e){
+function domain_form(e) {
     e.preventDefault();
     const elem = new FormData(e.target);
     let domainName = elem.get('domain-name');
-    if (!validateDomain(domainName)){
+    if (!validateDomain(domainName)) {
         alert_text.innerHTML = "<p><strong class='text-danger' id='alert-text'>Enter valid Domain name!!! </strong></p>";
         alertModel.show();
         return;
@@ -320,8 +340,8 @@ function domain_form(e){
     confirmModel.show();
     document.getElementById('confirmButton').addEventListener('click', async function () {
         confirmModel.hide();
-        await fetchReq('/api/domain', {'name' : domainName});
-    }, { once: true });    
+        await fetchReq('/api/domain', { 'name': domainName });
+    }, { once: true });
     e.target.reset();
 }
 

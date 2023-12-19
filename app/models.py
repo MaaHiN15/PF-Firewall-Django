@@ -1,5 +1,9 @@
 from django.db import models
-from uuid import uuid4
+import uuid
+
+
+def gen_uuid():
+    return uuid.uuid4().hex[-8:]
 
 class Options(models.Model):
     position = models.IntegerField(primary_key=True, unique=True)
@@ -9,7 +13,7 @@ class Options(models.Model):
         db_table = 'Options'
 
 class Table(models.Model):
-    id = models.UUIDField(primary_key=True, unique=True, default=uuid4)
+    id = models.CharField(primary_key=True, unique=True, default=gen_uuid, max_length=8)
     position = models.IntegerField()
     name = models.CharField(max_length=100, unique=True)
     iplist = models.CharField(max_length=200, unique=True)
@@ -17,12 +21,12 @@ class Table(models.Model):
         db_table = 'Table'
 
 class Filter(models.Model):
-    id =  models.UUIDField(primary_key=True, unique=True, default=uuid4)
+    id =  models.CharField(primary_key=True, unique=True, default=gen_uuid, max_length=8)
     type = models.CharField(max_length=10)
     position = models.IntegerField()
     action = models.CharField(max_length=10)
     direction = models.CharField(max_length=10)
-    interfaces = models.CharField(max_length=100)
+    interface = models.CharField(max_length=100)
     protocol = models.CharField(max_length=100)
     sourceAddress = models.CharField(max_length=1000)
     sourcePort = models.CharField(max_length=100)
@@ -35,10 +39,10 @@ class Filter(models.Model):
     
 
 class NatRules(models.Model):
-    id = models.UUIDField(primary_key=True, unique=True, default=uuid4)
+    id = models.CharField(primary_key=True, unique=True, default=gen_uuid, max_length=8)
     natChoose = models.CharField(max_length=10)
     position = models.IntegerField()
-    interfaces = models.CharField(max_length=100)
+    interface = models.CharField(max_length=100)
     protocol = models.CharField(max_length=100)
     sourceAddress = models.CharField(max_length=1000)
     sourcePort = models.CharField(max_length=100)
@@ -50,7 +54,7 @@ class NatRules(models.Model):
 
 
 class Domain(models.Model):
-    id = models.UUIDField(primary_key=True, unique=True, default=uuid4)
+    id = models.CharField(primary_key=True, unique=True, default=gen_uuid, max_length=8)
     position = models.IntegerField()
     domainName = models.CharField(max_length=200)
     address = models.CharField(max_length=10000)

@@ -1,21 +1,46 @@
-from .models import Options, Domain, Filter, Table, Position, NatRules
+from .models import *
 import psutil, re, pydig, fileinput, os, shutil
 from pffirewall.settings import BASE_DIR
 
-def writeFile(position, line):
-    if not os.path.exists(BASE_DIR / 'pf.conf'):
-        shutil.copyfile(BASE_DIR / 'pf.conf.temp', BASE_DIR / 'pf.conf')
-    with fileinput.FileInput('pf.conf', inplace=True) as file:
-        for p, l in enumerate(file, start=1):
-            if p == position:
-                print(line)
-            else:
-                print(l, end='')
-        fileinput.close()
+class Utilities:
+    def writeFile(self, position, line):
+        self.checkFileExist()
+        with fileinput.FileInput('pf.conf', inplace=True) as file:
+            for p, l in enumerate(file, start=1):
+                if p == int(position):
+                    print(line)
+                else:
+                    print(l, end='')
+            fileinput.close()
+    
+    def deleteLines(self, position):
+        self.checkFileExist()
+        with fileinput.FileInput('pf.conf', inplace=True) as file:
+            for p, l in enumerate(file, start=1):
+                if p == position:
+                    print('')
+                else:
+                    print(l, end='')
+            fileinput.close()
 
-def getInterfaces():
-    interfaces = psutil.net_if_stats()
-    return [interface for interface, stats in interfaces.items() if stats.isup]
+    def getContentOfFile(self):
+        self.checkFileExist()
+        with open(BASE_DIR / 'pf.conf', 'r') as file:
+            lines_list = []
+            for line_num, line in enumerate(file, start=1):
+                if line.strip():                        
+                    lines_list.append({'num':line_num, 'line':line})
+        file.close()
+        return lines_list
+            
+    def checkFileExist(self):
+        if not os.path.exists(BASE_DIR / 'pf.conf'):
+            shutil.copyfile(BASE_DIR / 'pf.conf.temp', BASE_DIR / 'pf.conf')
+
+    def getInterfaces(self):
+        interfaces = psutil.net_if_stats()
+        return [interface for interface, stats in interfaces.items() if stats.isup]
+
 
 
 class DomainDef:
@@ -40,7 +65,7 @@ class DomainDef:
             self.digHostname(name)
         domain = Domain(position=self.domainPosition, address=list(self.first_set), domainName=name)
         domain.save()
-        writeFile(position=self.domainPosition, line=f'block out to {{ {" ".join(list(self.first_set))} }}')
+        Utilities().writeFile(position=self.domainPosition, line=f'block out to {{ {" ".join(list(self.first_set))} }}')
         self.domainPosition += 1
         Position.objects.filter(id=1).update(domainPosition=self.domainPosition)
         return True
@@ -65,7 +90,6 @@ class OptionsDef:
     def __init__(self):
         self.options = {
             "blockPolicy":'drop',
-            "debugLevel": 'info',
             "OptimLevel": 'normal',
             "rulesetOptim": 'basic',
             "statePolicy": 'floating',
@@ -85,21 +109,17 @@ class OptionsDef:
                     self.switch(key, val)
                     self.changeOptions()
 
-
     def switch(self, key, val):
-        print(key, val)
         if key == 'blockPolicy':
-            writeFile(2, f'set block-policy {val}')
-        elif key == 'debugLevel':
-            writeFile(3, f'set debug {val}')
+            Utilities().writeFile(2, f'set block-policy {val}')
         elif key == 'OptimLevel':
-            writeFile(4, f'set optimization {val}')
+            Utilities().writeFile(3, f'set optimization {val}')
         elif key == 'rulesetOptim':
-            writeFile(5, f'set ruleset-optimization {val}')
+            Utilities().writeFile(4, f'set ruleset-optimization {val}')
         elif key == 'statePolicy':
-            writeFile(6, f'set state-policy {val}')
+            Utilities().writeFile(5, f'set state-policy {val}')
         elif key == 'timeoutInterval':
-            writeFile(7, f'set timeout interval {val}')
+            Utilities().writeFile(6, f'set timeout interval {val}')
 
     
 class TableDef:
@@ -111,11 +131,12 @@ class TableDef:
             obj = Position.objects.create(id=1, tablePosition=10, filterRulePosition=200, domainPosition= 300, natRulePosition=450)
             obj.save()
             self.lastPosition = obj.tablePosition
+
     def tableCreation(self, data):
         if not Table.objects.filter(name=data['tabName']).exists() and not Table.objects.filter(iplist=data['tabIps']).exists():
             table = Table(position=self.lastPosition, name=data['tabName'], iplist=data['tabIps'])
             table.save()
-            writeFile(position=self.lastPosition, line=f'table <{data["tabName"]}> const {set(data["tabIps"])}')
+            Utilities().writeFile(position=self.lastPosition, line=f'table <{data["tabName"]}> const {set(data["tabIps"])}')
             self.lastPosition += 1
             Position.objects.filter(id=1).update(tablePosition=self.lastPosition)
             return True
@@ -131,13 +152,16 @@ class FilterRulesDef:
             obj = Position.objects.create(id=1, tablePosition=10, filterRulePosition=200, domainPosition= 300, natRulePosition=450)
             obj.save()
             self.filterRulePosition = obj.filterRulePosition
+
     def filterRuleCreation(self, data):
         try:
+            if data['position']:
+                self.filterRulePosition = data['position']
             rules_table = Filter(
                     position=self.filterRulePosition, 
                     action = data['action'],
                     direction = data['direction'],
-                    interfaces = data['interface'],
+                    interface = data['interface'],
                     protocol = data['protocol'],
                     sourceAddress = data['sourceAddress'],
                     sourcePort = data['sourcePort'],
@@ -147,11 +171,14 @@ class FilterRulesDef:
                     log = data['log'],
                     type = data['type'])
             rules_table.save()
-            writeFile(position=self.filterRulePosition, line=self.makeRule(data))
-            self.filterRulePosition += 1
-            Position.objects.filter(id=1).update(filterRulePosition=self.filterRulePosition)
+            Utilities().writeFile(position=self.filterRulePosition, line=self.makeRule(data))
+            if not data['position']:
+                self.filterRulePosition += 1
+                Position.objects.filter(id=1).update(filterRulePosition=self.filterRulePosition)
+            return True
         except Exception as e:
             print(e)
+            return False
 
     def makeRule(self, data):
         def checkForAll(item):
@@ -214,12 +241,12 @@ class NatDef:
             obj = Position.objects.create(id=1, tablePosition=10, filterRulePosition=200, domainPosition= 300, natRulePosition=450)
             obj.save()
             self.natRulePosition = obj.natRulePosition
+
     def natRuleFunc(self, data):
-            print(data)
             natRules = NatRules(
                 natChoose = data['natChoose'],
                 position=self.natRulePosition, 
-                interfaces = data['interface'],
+                interface = data['interface'],
                 protocol = data['protocol'],
                 sourceAddress = data['sourceAddress'],
                 sourcePort = data['sourcePort'],
@@ -228,11 +255,11 @@ class NatDef:
                 natIP = data['natIP']
             )
             natRules.save()
-            writeFile(position=self.natRulePosition, line=self.makeNatRule(data))
+            Utilities().writeFile(position=self.natRulePosition, line=self.makeNatRule(data))
             self.natRulePosition += 1
             Position.objects.filter(id=1).update(natRulePosition=self.natRulePosition)
             return True
-
+    
     def makeNatRule(self, data):
         def checkForAll(item):
             return any(_ == 'all' for _ in item)
@@ -272,5 +299,4 @@ class NatDef:
             self.rule += '  to any'
 
         self.rule += f' -> {data["natIP"]}'
-        print(self.rule)
         return self.rule

@@ -1,13 +1,12 @@
-### Basic Options ###
+################################## Basic Options ######################################
 set block-policy drop
-set debug info
 set optimization normal
 set ruleset-optimization basic
 set state-policy floating
 set timeout interval 10
 
-### Table Definitions ###
 
+############################## Table Definitions #######################################
 
 
 
@@ -196,8 +195,8 @@ set timeout interval 10
 
 
 
-### Filter Rules ###
 
+################################# Filter Rules #########################################
 
 
 
@@ -296,8 +295,8 @@ set timeout interval 10
 
 
 
-### Domain Rules ###
 
+################################# Domain Rules #########################################
 
 
 
@@ -446,7 +445,8 @@ set timeout interval 10
 
 
 
-### NAT/BINAT Rules ###
+
+################################# NAT/BINAT Rules ######################################
 
 
 

@@ -5,6 +5,16 @@
 
 <div class="container my-5 h-100">
 
+	<div class="container d-flex align-items-center justify-content-evenly my-4">
+		<div class="form-check form-switch">
+			<input class="form-check-input" type="checkbox" role="switch" id="">
+			<label class="form-check-label" for="flexSwitchCheckDefault"><strong>Firewall Status</strong></label>
+		</div>
+		<div class="d-grid col-2">
+			<button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">Apply pf.conf</button>
+		</div>
+	</div>
+
 	<div class="accordion accordion-flush" id="accordionFlushExample">
 		<!-- Basic Options -->
 		<div class="accordion-item">
@@ -33,16 +43,9 @@
 							<div class="col-sm-2"></div>
 							<div class="col-sm-4">
 								<div class="input-group mb-3">
-									<label class="input-group-text" for="inputGroupSelect01">Set Debug Level</label>
-									<select class="form-select" id="inputGroupSelect01" name="set-deb-lev">
-										<option value="debug">Debug</option>
-										<option selected value="info">Info</option>
-										<option value="notice">Notice</option>
-										<option value="warning">Warning</option>
-										<option value="err">Error</option>
-										<option value="crit">Critical</option>
-										<option value="alert">Alert</option>
-									</select>
+									<span class="input-group-text">Set Timeout Interval</span>
+									<input type="number" class="form-control" value="10" name="timeout-interval">
+									<span class="input-group-text">Seconds</span>
 								</div>
 							</div>
 						</div>
@@ -82,13 +85,6 @@
 								</div>
 							</div>
 							<div class="col-sm-2"></div>
-							<div class="col-sm-4">
-								<div class="input-group mb-3">
-									<span class="input-group-text">Set Timeout Interval</span>
-									<input type="number" class="form-control" value="10" name="timeout-interval">
-									<span class="input-group-text">Seconds</span>
-								</div>
-							</div>
 						</div>
 						<button type="submit" class="btn btn-success ">Submit</button>
 					</form>
@@ -108,16 +104,17 @@
 				data-bs-parent="#accordionFlushExample">
 				<form id="tab-form">
 					<div class="accordion-body">
+
 						<div class="input-group">
-							<span class="input-group-text" id="basic-addon3">Enter Table name:</span>
+							<span class="input-group-text" id="name">Enter Table name:</span>
 							<input type="text" class="form-control" name="tab-name" id="basic-url"
 								aria-describedby="basic-addon3" required>
 						</div>
 						<p class="mb-3"><small>*Enter name without space or symbol.</small> <br>
 						<div class="input-group">
 							<span class="input-group-text">IP Ranges</span>
-							<textarea class="form-control" rows="3" name="tab-ips" aria-label="With textarea"
-								required></textarea>
+							<textarea class="form-control" rows="3" name="tab-ips" id="iplist"
+								aria-label="With textarea" required></textarea>
 						</div>
 						<p><small>*Enter IP ranges at each line.</small> <br>
 							<button type="submit" class="btn btn-success my-2 ">Submit</button>
@@ -267,6 +264,17 @@
 								</div>
 							</div>
 						</div>
+						<div class="col">
+							<div class="col-sm-4">
+								<div class="input-group mb-3">
+									<span class="input-group-text text-primary ">Position</span>
+									<input type="number" name="filterRulePosition" class="form-control"
+										aria-label="Position Number">
+									<p><small>*Enter position if you're going to edit specific line in pf.conf or leave
+											empty.</small></p>
+								</div>
+							</div>
+						</div>
 						<div class="col-12 m-3">
 							<div class="form-check">
 								<input class="form-check-input" name="forceCheck" type="checkbox" id="gridCheck">
@@ -410,6 +418,17 @@
 								<div class="col-sm-8">
 									<textarea class="form-control" name="destPort" id="" rows="3">all</textarea>
 									<p><small>*Enter port at each line.</small></p>
+								</div>
+							</div>
+						</div>
+						<div class="col">
+							<div class="col-sm-4">
+								<div class="input-group mb-3">
+									<span class="input-group-text text-primary ">Position</span>
+									<input type="number" name="filterRulePosition" class="form-control"
+										aria-label="domain name">
+									<p><small>*Enter position if you're going to edit specific line in pf.conf or leave
+											empty.</small></p>
 								</div>
 							</div>
 						</div>
@@ -562,32 +581,17 @@
 				data-bs-parent="#accordionFlushExample">
 				<div class="accordion-body">
 					<form id="domain-form">
-						<div class="input-group mb-3">
+						<div class="input-group">
 							<span class="input-group-text">Domain Name</span>
 							<input type="text" name="domain-name" class="form-control" aria-label="domain name">
-						</div>	
-						<button type="submit" class="btn btn-success mt-1">Submit</button>					
+						</div>
+						<p class="mb-3"><small>*Enter domain name without protocol as well as trailing slashes. (eg:
+								github.com)</small><br /></p>
+						<button type="submit" class="btn btn-success mt-1">Submit</button>
 					</form>
 				</div>
 			</div>
 		</div>
-
-		<!-- ### Uploading PF configuration file ###  -->
-		<!-- <div class="accordion-item">
-			<h2 class="accordion-header" id="flush-headingSeven">
-			  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseSeven" aria-expanded="false" aria-controls="flush-collapseSeven">
-				<strong>Upload PF conf file</strong>
-			  </button>
-			</h2>
-			<div id="flush-collapseSeven" class="accordion-collapse collapse" aria-labelledby="flush-headingSeven" data-bs-parent="#accordionFlushExample">
-			  <div class="accordion-body">
-				<div class="input-group">
-					<input type="file" class="form-control" id="inputGroupFile04" aria-describedby="inputGroupFileAddon04" aria-label="Upload">
-					<button class="btn btn-outline-success " type="button" id="inputGroupFileAddon04">Button</button>
-				  </div>			
-				</div>
-			</div>
-		  </div> -->
 
 	</div>
 </div>
@@ -640,7 +644,9 @@
 			<small>A second ago</small>
 			<button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
 		</div>
-		<div class="toast-body"><p id="succuessToastText"></p></div>
+		<div class="toast-body">
+			<p id="succuessToastText"></p>
+		</div>
 	</div>
 </div>
 
@@ -652,7 +658,9 @@
 			<small>A second ago</small>
 			<button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
 		</div>
-		<div class="toast-body"><p id="unsuccessToastText"></p></div>
+		<div class="toast-body">
+			<p id="unsuccessToastText"></p>
+		</div>
 	</div>
 </div>
 
@@ -664,10 +672,38 @@
 			<small>A second ago</small>
 			<button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
 		</div>
-		<div class="toast-body" ><p id="warningToastText"></p></div>
+		<div class="toast-body">
+			<p id="warningToastText"></p>
+		</div>
 	</div>
 </div>
 
+<!-- Page Center Modal -->
+<div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+	<div class="modal-dialog">
+	  <div class="modal-content">
+		<div class="modal-header">
+		  <h2 class="modal-title fs-5 text-dark" id="staticBackdropLabel">PF Firewall</h2>
+		  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		</div>
+		<div class="modal-body">
+		  Are you sure to apply pf.conf file?
+		</div>
+		<div class="modal-footer">
+		  <button type="button" class="btn btn-outline-danger " data-bs-dismiss="modal">Close</button>
+		  <button type="button" class="btn btn-outline-success ">Apply</button>
+		</div>
+	  </div>
+	</div>
+  </div>
+
 <script src="../static/js/addrule.js"></script>
 
+{% endblock %}
+
+{% block footer %}
+<div class="container d-flex justify-content-center align-items-center ">
+	<p>For more details about OpenBSD PF Firewall, check <a href="https://www.openbsd.org/faq/pf/"
+			target="_blank">Documentation!!</a></p>
+</div>
 {% endblock %}

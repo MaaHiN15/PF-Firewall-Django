@@ -21,7 +21,7 @@
             <nav>
                 <div class="nav-container">
                     <ul class="nav-tabs">
-                        <li class="nav-tab"><a href="/">Add</a></li></a>
+                        <li class="nav-tab"><a href="/">Home</a></li></a>
                         <li class="nav-tab"><a href="/view">View</a></li></a>
                         <li class="nav-tab"><a href="/edit">Edit</a></li></a>
                     </ul>
@@ -29,27 +29,14 @@
             </nav>
         </div>
     </header>
-    
+
     <main>
-        <div class="container">
-            {% block body %} {% endblock %}
-        </div>
+        {% block body %} {% endblock %}
     </main>
 
     <footer>
-        <div class="container d-flex justify-content-center align-items-center ">
-            <p>For more details about OpenBSD PF Firewall, check <a href="https://www.openbsd.org/faq/pf/" target="_blank">Documentation!!</a></p>
-        </div>
+        {% block footer %} {% endblock %}
     </footer>
 </body>
+
 </html>
-
-
-
-
-
-
-
-
-
-
