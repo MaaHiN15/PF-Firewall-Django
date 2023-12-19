@@ -134,7 +134,7 @@ function filter_tab_form(e) {
     };
     position = elem.get('filterRulePosition');
     if (position.length != 0) {
-        if (Number(position) <= 199 || Number(position) >= 298) {
+        if (Number(position) <= 249 || Number(position) >= 349) {
             alert_text.innerHTML = "<p><strong class='text-danger' id='alert-text'>Enter valid Position Number!!</strong></p>";
             alertModel.show();
             return;
@@ -213,7 +213,7 @@ function filter_man_form(e) {
     };
     position = elem.get('filterRulePosition');
     if (position.length != 0) {
-        if (Number(position) <= 199 || Number(position) >= 298) {
+        if (Number(position) <= 249 || Number(position) >= 349) {
             alert_text.innerHTML = "<p><strong class='text-danger' id='alert-text'>Enter valid Position Number!!</strong></p>";
             alertModel.show();
             return;
