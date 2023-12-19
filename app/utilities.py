@@ -1,5 +1,5 @@
 from .models import *
-import psutil, re, pydig, fileinput, os, shutil
+import psutil, re, pydig, fileinput, os, shutil, subprocess
 from pffirewall.settings import BASE_DIR
 
 class Utilities:
@@ -40,8 +40,25 @@ class Utilities:
     def getInterfaces(self):
         interfaces = psutil.net_if_stats()
         return [interface for interface, stats in interfaces.items() if stats.isup]
+    
+    def getStatus(self):
+        return 'enabled' in subprocess.run(['pfctl', '-s', 'info'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=False).stdout.lower()
+    
+    def statusTurnOn(self):
+        try:
+            subprocess.run(['pfctl', '-e'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=False)
+            return True
+        except Exception as e:
+            print(e)
+            return False
 
-
+    def statusTurnOff(self):
+        try:
+            subprocess.run(['sudo','pfctl', '-d'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=False)
+            return True
+        except Exception as e:
+            print(e)
+            return False
 
 class DomainDef:
     def __init__(self) -> None:
@@ -49,7 +66,7 @@ class DomainDef:
             obj = Position.objects.get(id=1)
             self.domainPosition = obj.domainPosition
         except Position.DoesNotExist:
-            obj = Position.objects.create(id=1, tablePosition=10, filterRulePosition=200, domainPosition= 300, natRulePosition=450)
+            obj = Position.objects.create(id=1, tablePosition=10, filterRulePosition=250, domainPosition= 350, natRulePosition=200)
             obj.save()
             self.domainPosition = obj.domainPosition
 
@@ -128,7 +145,7 @@ class TableDef:
             obj = Position.objects.get(id=1)
             self.lastPosition = obj.tablePosition
         except Position.DoesNotExist:
-            obj = Position.objects.create(id=1, tablePosition=10, filterRulePosition=200, domainPosition= 300, natRulePosition=450)
+            obj = Position.objects.create(id=1, tablePosition=10, filterRulePosition=250, domainPosition= 350, natRulePosition=200)
             obj.save()
             self.lastPosition = obj.tablePosition
 
@@ -136,7 +153,7 @@ class TableDef:
         if not Table.objects.filter(name=data['tabName']).exists() and not Table.objects.filter(iplist=data['tabIps']).exists():
             table = Table(position=self.lastPosition, name=data['tabName'], iplist=data['tabIps'])
             table.save()
-            Utilities().writeFile(position=self.lastPosition, line=f'table <{data["tabName"]}> const {set(data["tabIps"])}')
+            Utilities().writeFile(position=self.lastPosition, line=f'table <{data["tabName"]}> const {{ {" ".join(map(str,data["tabIps"]))} }}')
             self.lastPosition += 1
             Position.objects.filter(id=1).update(tablePosition=self.lastPosition)
             return True
@@ -149,7 +166,7 @@ class FilterRulesDef:
             obj = Position.objects.get(id=1)
             self.filterRulePosition = obj.filterRulePosition
         except Position.DoesNotExist:
-            obj = Position.objects.create(id=1, tablePosition=10, filterRulePosition=200, domainPosition= 300, natRulePosition=450)
+            obj = Position.objects.create(id=1, tablePosition=10, filterRulePosition=250, domainPosition= 350, natRulePosition=200)
             obj.save()
             self.filterRulePosition = obj.filterRulePosition
 
@@ -238,7 +255,7 @@ class NatDef:
             obj = Position.objects.get(id=1)
             self.natRulePosition = obj.natRulePosition
         except Position.DoesNotExist:
-            obj = Position.objects.create(id=1, tablePosition=10, filterRulePosition=200, domainPosition= 300, natRulePosition=450)
+            obj = Position.objects.create(id=1, tablePosition=10, filterRulePosition=250, domainPosition= 350, natRulePosition=200)
             obj.save()
             self.natRulePosition = obj.natRulePosition
 

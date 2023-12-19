@@ -7,11 +7,11 @@
 
 	<div class="container d-flex align-items-center justify-content-evenly my-4">
 		<div class="form-check form-switch">
-			<input class="form-check-input" type="checkbox" role="switch" id="">
+			<input class="form-check-input" type="checkbox" role="switch" id="statusCheck" {% if status %} checked {% endif %}>
 			<label class="form-check-label" for="flexSwitchCheckDefault"><strong>Firewall Status</strong></label>
 		</div>
 		<div class="d-grid col-2">
-			<button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">Apply pf.conf</button>
+			<button type="button" onclick="applyFunc()" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">Apply pf.conf</button>
 		</div>
 	</div>
 
@@ -652,7 +652,7 @@
 
 <!-- Unsuccess Toast -->
 <div class="toast-container position-fixed bottom-0 end-0 p-3">
-	<div id="unsuccessToast" class="toast text-bg-secondary " role="alert" aria-live="assertive" aria-atomic="true">
+	<div id="unsuccessToast" class="toast text-bg-danger" role="alert" aria-live="assertive" data-bs-delay="30000" aria-atomic="true">
 		<div class="toast-header">
 			<strong class="me-auto">PF Firewall</strong>
 			<small>A second ago</small>
@@ -678,24 +678,6 @@
 	</div>
 </div>
 
-<!-- Page Center Modal -->
-<div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-	<div class="modal-dialog">
-	  <div class="modal-content">
-		<div class="modal-header">
-		  <h2 class="modal-title fs-5 text-dark" id="staticBackdropLabel">PF Firewall</h2>
-		  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-		</div>
-		<div class="modal-body">
-		  Are you sure to apply pf.conf file?
-		</div>
-		<div class="modal-footer">
-		  <button type="button" class="btn btn-outline-danger " data-bs-dismiss="modal">Close</button>
-		  <button type="button" class="btn btn-outline-success ">Apply</button>
-		</div>
-	  </div>
-	</div>
-  </div>
 
 <script src="../static/js/addrule.js"></script>
 

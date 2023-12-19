@@ -1,14 +1,13 @@
 const alert_text = document.getElementById('alert-text');
 const confirm_text = document.getElementById('confirm-text');
 const successToastText = document.getElementById('succuessToastText');
-const unsuccessToastText = document.getElementById('unsuccuessToastText');
+const unsuccessToastText = document.getElementById('unsuccessToastText');
 const warningToastText = document.getElementById('warningToastText');
 const alertModel = new bootstrap.Modal(document.getElementById('alertModel'));
 const confirmModel = new bootstrap.Modal(document.getElementById('confirmModel'));
 const successToast = new bootstrap.Toast(document.getElementById('successToast'));
 const unsuccessToast = new bootstrap.Toast(document.getElementById('unsuccessToast'));
-const warningToast = new bootstrap.Toast(document.getElementById('warningToast'))
-
+const warningToast = new bootstrap.Toast(document.getElementById('warningToast'));
 
 function validateCidrIp(CidrIp) {
     const cidrIpRegex = /^((((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\/([1-9]|[1-2][0-9]|3[0-2])))$|^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)|all)$/;
@@ -40,12 +39,16 @@ function multiselect(temp) {
     return arr;
 };
 
-async function fetchReq(url, data) {
-    const response = fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", 'Accept': 'application/json', 'X-CSRFToken': csrfToken },
-        body: JSON.stringify(data)
-    }).then(response => response.json())
+async function fetchReq(url, data, method) {
+    let requestOptions = {
+        method: method,
+        headers: { "Content-Type": "application/json", 'Accept': 'application/json', 'X-CSRFToken': csrfToken }
+    };
+    if (method === 'POST') {
+        requestOptions.body = JSON.stringify(data);
+    };
+    await fetch(url, requestOptions)
+        .then(response => response.json())
         .then(data => {
             confirmModel.hide();
             if (data['status'] == 200) {
@@ -54,8 +57,9 @@ async function fetchReq(url, data) {
             } else if (data['status'] == 300) {
                 warningToast.show();
                 warningToastText.innerHTML = data['text']
-            } else {
+            } else if (data['status'] == 400) {
                 unsuccessToast.show();
+                console.log(data['text'])
                 unsuccessToastText.innerHTML = data['text']
             }
         })
@@ -85,7 +89,7 @@ function base_section_form(e) {
     `
     confirmModel.show();
     document.getElementById('confirmButton').addEventListener('click', async function () {
-        await fetchReq('/api/baseForm', data);
+        await fetchReq('/api/baseForm', data, 'POST');
     }, { once: true })
 };
 
@@ -93,26 +97,22 @@ function tab_form(e) {
     e.preventDefault();
     const elem = new FormData(e.target);
     let ips = elem.get('tab-ips').split('\n');
-    if (ips.some(i => !validateCidrIp(i))) {
-        alert_text.innerHTML = "<p><strong class='text-danger' id='alert-text'>Enter valid CIDR / IP</strong></p>";
+    let name = elem.get('tab-name');
+    if (ips.some(i => !validateCidrIp(i)) || name == 'table' || name.includes(' ') ) {
+        alert_text.innerHTML = "<p><strong class='text-danger' id='alert-text'>Check IP/Table name (Don't use table as name)</strong></p>";
         alertModel.show();
         return;
-    }
-    let data = {
-        "tabName": elem.get('tab-name'),
-        "tabIps": ips
     };
-
     confirm_text.innerHTML = `<table class="table table-hover">
     <tbody>
-        <tr><td scope="row">Table Name</th><td>${data.tabName}</td></tr>
-        <tr><td scope="row">IP / CIDR</td><td>${data.tabIps}</td></tr>
+        <tr><td scope="row">Table Name</th><td>${name}</td></tr>
+        <tr><td scope="row">IP / CIDR</td><td>${ips}</td></tr>
     </tbody>
     </table>
     `
     confirmModel.show();
     document.getElementById('confirmButton').addEventListener('click', async function () {
-        await fetchReq('/api/table', data);
+        await fetchReq('/api/table', {"tabName": name,"tabIps": ips}, 'POST');
     }, { once: true });
 };
 
@@ -175,7 +175,7 @@ function filter_tab_form(e) {
     `
     confirmModel.show();
     document.getElementById('confirmButton').addEventListener('click', async function () {
-        await fetchReq('/api/filter', data);
+        await fetchReq('/api/filter', data, 'POST');
     }, { once: true });
     e.target.reset();
 }
@@ -253,7 +253,7 @@ function filter_man_form(e) {
     `
     confirmModel.show();
     document.getElementById('confirmButton').addEventListener('click', async function () {
-        await fetchReq('/api/filter', data);
+        await fetchReq('/api/filter', data, 'POST');
     }, { once: true });
     e.target.reset();
 }
@@ -322,7 +322,7 @@ function nat_form(e) {
     `
     confirmModel.show();
     document.getElementById('confirmButton').addEventListener('click', async function () {
-        await fetchReq('/api/nat', data);
+        await fetchReq('/api/nat', data, 'POST');
     }, { once: true });
     e.target.reset();
 };
@@ -340,11 +340,28 @@ function domain_form(e) {
     confirmModel.show();
     document.getElementById('confirmButton').addEventListener('click', async function () {
         confirmModel.hide();
-        await fetchReq('/api/domain', { 'name': domainName });
+        await fetchReq('/api/domain', { 'name': domainName }, 'POST');
     }, { once: true });
     e.target.reset();
-}
+};
 
+
+document.getElementById('statusCheck').addEventListener('change', async function (e) {
+    if (e.target.checked) {
+        await fetchReq(url = '/api/status/on', method = 'GET');
+    } else {
+        await fetchReq(url = '/api/status/off', method = 'GET');
+    }
+});
+
+async function applyFunc(){
+    confirm_text.innerHTML = 'Are you sure to apply <strong>pf.conf</strong> file?'
+    confirmModel.show();
+    document.getElementById('confirmButton').addEventListener('click', async function () {
+        confirmModel.hide();
+        await fetchReq(url='/api/apply', method='GET');
+    }, { once: true });
+};
 
 document.getElementById('base-section').addEventListener('submit', base_section_form)
 document.getElementById('tab-form').addEventListener('submit', tab_form)

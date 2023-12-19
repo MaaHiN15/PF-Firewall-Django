@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.urls import reverse
-import json
+import json, subprocess
 from .models import *
 from .utilities import *
 
@@ -9,7 +9,8 @@ def index(req):
     return render(req, 'addrule.html', {
         'interfaces' : Utilities().getInterfaces(),
         'tables' : list(Table.objects.values_list('name', flat=True)),
-        'position' : Position.objects.first()
+        'position' : Position.objects.first(),
+        'status' : Utilities().getStatus()
     })
 
 def viewFile(req):
@@ -37,7 +38,7 @@ def table(req):
     if req.method == 'POST':
         try:
             if TableDef().tableCreation(json.loads(req.body.decode("utf-8"))):
-                return JsonResponse({'status': 200, 'text' : 'Table created/modifed successfully!!'})
+                return JsonResponse({'status': 200, 'text' : 'Table created successfully!!'})
             else:
                 return JsonResponse({'status': 300, 'text' : 'Duplicate Table entry!!'})
         except Exception as e:
@@ -93,3 +94,27 @@ def delete(req, cls):
     Utilities().deleteLines(data.position)
     cls.objects.filter(id=req.GET.get('id')).delete()
     return True
+
+
+def statusOn(req):
+    if Utilities().statusTurnOn():
+        return JsonResponse({'status':200, 'text':'PF successfully enabled!'})
+    return JsonResponse({'status':300, 'text':'PF Already Enabled!'})
+
+def statusOff(req):
+    if Utilities().statusTurnOff():
+        return JsonResponse({'status':200, 'text':'PF successfully disabled!'})
+    return JsonResponse({'status':300, 'text':'PF Already disabled!'})
+
+def applyConf(req):
+    try:
+        name = BASE_DIR / 'pf.conf'
+        process = subprocess.run(['pfctl', '-nf', name], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=False)
+        if process.returncode == 0:
+            subprocess.run(['pfctl', '-f', str(name)], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=False)
+            return JsonResponse({'status': 200, 'text': 'pf.conf applied successfully!'})
+        else:
+            error_text = process.stderr.strip() if process.stderr else 'Unknown error'
+            return JsonResponse({'status': 400, 'text': f'Error applying pf.conf: {error_text}'})
+    except Exception as e:
+        return JsonResponse({'status': 400, 'text': f'Exception: {str(e)}'})
