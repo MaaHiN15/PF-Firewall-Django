@@ -5,7 +5,6 @@ urlpatterns = [
     path('', views.index),
     path('view', views.viewFile, name='view'),
     path('edit', views.editFile, name='edit'),
-    path('edit/<str:alert>', views.editFile, name='edit'),
     path('api/table/delete', views.tableDeletion),
     path('api/filter/delete', views.filterRuleDeletion),
     path('api/nat/delete', views.natRulesDeletion),
