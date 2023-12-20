@@ -114,6 +114,7 @@ function tab_form(e) {
     document.getElementById('confirmButton').addEventListener('click', async function () {
         await fetchReq('/api/table', {"tabName": name,"tabIps": ips}, 'POST');
     }, { once: true });
+    e.target.reset();
 };
 
 function filter_tab_form(e) {
