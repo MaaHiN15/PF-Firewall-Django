@@ -364,6 +364,15 @@ async function applyFunc(){
     }, { once: true });
 };
 
+async function resetAll(){
+    confirm_text.innerHTML = 'This should reset pf.conf file as well as database. Are you sure?'
+    confirmModel.show();
+    document.getElementById('confirmButton').addEventListener('click', async function () {
+        confirmModel.hide();
+        await fetchReq(url='/api/reset', method='GET');
+    }, { once: true });
+}
+
 document.getElementById('base-section').addEventListener('submit', base_section_form)
 document.getElementById('tab-form').addEventListener('submit', tab_form)
 document.getElementById('fil-tab-form').addEventListener('submit', filter_tab_form)

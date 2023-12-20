@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.urls import reverse
-import json, subprocess
+import json, subprocess, os
 from .models import *
 from .utilities import *
 
@@ -118,3 +118,15 @@ def applyConf(req):
             return JsonResponse({'status': 400, 'text': f'Error applying pf.conf: {error_text}'})
     except Exception as e:
         return JsonResponse({'status': 400, 'text': f'Exception: {str(e)}'})
+
+
+def resetAll(req):
+    try:
+        if os.path.exists(BASE_DIR / 'pf.conf'):
+            os.remove(BASE_DIR / 'pf.conf')
+        obj = [Options, Table, Filter, NatRules, Domain, Position]
+        for i in obj:
+            i.objects.all().delete()
+        return JsonResponse({'status': 200, 'text': 'Reset completed successfully!'})
+    except Exception as e:
+        return JsonResponse({'status' : 400, 'text' : e})

@@ -10,8 +10,13 @@
 			<input class="form-check-input" type="checkbox" role="switch" id="statusCheck" {% if status %} checked {% endif %}>
 			<label class="form-check-label" for="flexSwitchCheckDefault"><strong>Firewall Status</strong></label>
 		</div>
-		<div class="d-grid col-2">
-			<button type="button" onclick="applyFunc()" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">Apply pf.conf</button>
+		<div class="row">
+			<div class="col">
+				<button type="button" onclick="applyFunc()" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">Apply</button>
+			</div>
+			<div class="col">
+				<button type="button" onclick="resetAll()" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#staticBackdrop">Reset</button>
+			</div>
 		</div>
 	</div>
 

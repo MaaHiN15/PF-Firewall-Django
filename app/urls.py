@@ -17,5 +17,6 @@ urlpatterns = [
     path('api/domain', views.domainBlock),
     path('api/status/on', views.statusOn),
     path('api/status/off', views.statusOff),
-    path('api/apply', views.applyConf)
+    path('api/apply', views.applyConf),
+    path('api/reset', views.resetAll)
 ]
