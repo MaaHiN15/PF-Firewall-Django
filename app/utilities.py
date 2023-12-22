@@ -1,5 +1,5 @@
 from .models import *
-import psutil, re, pydig, fileinput, os, shutil, subprocess
+import psutil, re, pydig, fileinput, os, shutil, subprocess, netaddr
 from pffirewall.settings import BASE_DIR
 
 class Utilities:
@@ -75,9 +75,8 @@ class DomainDef:
             return False
         self.count = 0
         self.first_set = set()
-        self.second_set = set()
         for _ in range(200):
-            if self.count > 20:
+            if self.count > 30:
                 break
             self.digHostname(name)
         domain = Domain(position=self.domainPosition, address=list(self.first_set), domainName=name)
@@ -89,9 +88,10 @@ class DomainDef:
             
     def digHostname(self, name):
         try:
-            self.second_set.update([item for item in pydig.query(name, 'A') if self.validateIP(item)])
-            if self.first_set != self.second_set:
-                self.first_set = self.second_set.copy()
+            self.second_set = set([item for item in pydig.query(name, 'A') if self.validateIP(item)])
+            print(self.first_set)
+            if not self.second_set.issubset(self.first_set):
+                self.first_set.update(self.second_set)
                 self.count = 0
             else:
                 self.count += 1
